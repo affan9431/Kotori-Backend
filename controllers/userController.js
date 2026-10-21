@@ -1,5 +1,22 @@
 const User = require("../models/userModel");
 
+const getToken = (user) => {
+  return jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      japaneseLevel: user.japaneseLevel,
+      reasonForLearning: user.reasonForLearning,
+      timeAvailable: user.timeAvailable,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    },
+  );
+};
+
 exports.createUser = async (req, res) => {
   try {
     const { fullName, email, password, level, motivation, time } = req.body;
@@ -17,12 +34,14 @@ exports.createUser = async (req, res) => {
       reasonForLearning: motivation,
       timeAvailable: time,
     });
-    console.log("User created successfully:", user);
+
+    const token = getToken(user);
 
     res.status(201).json({
       status: "success",
       data: {
         user,
+        token,
       },
     });
   } catch (error) {
